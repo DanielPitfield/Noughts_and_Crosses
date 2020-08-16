@@ -1,4 +1,4 @@
-# Noughts_and_Crosses
+# Noughts and Crosses
 An online implementation of the 'Noughts and Crosses' game.
 
 A move can be made by clicking on any available position of the game board.
