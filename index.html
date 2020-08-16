@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Noughts and Crosses</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="lodash.js"></script>
+</head>
+
+<style>
+	body {
+		background-color: rgba(0, 0, 0, 0.6);
+	}
+
+	.btn-primary {
+		padding: 30% 0;
+		height: 28vh;
+		text-align: center;
+		background-color: white;
+		font-size: 80px;
+		padding-top: 60px;
+	}
+	
+	.btn-primary:disabled {
+		background-color:#6699ff;
+	}
+
+	.container {
+		margin-top: 3em;
+	}
+
+	.options {
+		margin-top: 2em;
+		text-align: center;
+		display: flex;
+		justify-content: center;
+	}
+
+	#Toggle_AI, #Toggle_Human, #Restart {
+		width: 200px;
+		padding: 12px 10px;
+	}
+
+	@media screen and (max-width: 450px) {
+		.container {
+			margin-top: 1.5em;
+		}
+
+		.options {
+			margin-top: 1em;
+		}
+
+		#Toggle_AI, #Toggle_Human, #Restart {
+			width: 200px;
+			padding: 12px 10px;
+			font-size: 0.7em;
+		}
+
+	}
+</style>
+
+<body>
+
+<div class="container">  
+	<div class="btn-group btn-group-justified">
+		<div id="row_1" class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=0 data-j=0> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=0 data-j=1> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=0 data-j=2> </button>
+		</div>
+	</div>
+
+	<div class="btn-group btn-group-justified">
+		<div id="row_2" class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=1 data-j=0> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=1 data-j=1> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=1 data-j=2> </button>
+		</div>
+	</div>
+
+	<div class="btn-group btn-group-justified">
+		<div id="row_3" class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=2 data-j=0> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=2 data-j=1> </button>
+		</div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary" data-i=2 data-j=2> </button>
+		</div>
+	</div>
+
+	<div class="options">
+		<button id="Toggle_AI" disabled>Player vs AI</button>
+		<button id="Restart">Restart</button>
+		<button id="Toggle_Human">Player vs Player</button>
+	</div>
+</div>
+
+<script>
+	window.onload = (function () {
+		var ToggleAI = true;
+
+		// Add start game initialiser
+		document.getElementById("Toggle_AI").addEventListener("click", (event) => {
+			document.getElementById("Toggle_AI").setAttribute("disabled", "true");
+			document.getElementById("Toggle_Human").removeAttribute("disabled");
+			ToggleAI = true;
+			restartGame();
+		});
+		document.getElementById("Toggle_Human").addEventListener("click", (event) => {
+			document.getElementById("Toggle_Human").setAttribute("disabled", "true");
+			document.getElementById("Toggle_AI").removeAttribute("disabled");
+			ToggleAI = false;
+			restartGame();
+		});
+
+		// Add restart event listener
+		document.getElementById("Restart").addEventListener("click", () => restartGame());
+		
+		const grid = [
+		[' ',' ',' '],
+		[' ',' ',' '],
+		[' ',' ',' '],
+		];
+
+		var TurnCount = 0;
+		var Nought = "O";
+		var Cross = "X";
+		
+		function CheckGameState(grid) {	
+			// Rows
+			for (var i = 0; i<3; i++) {
+				if (grid[i][0] != ' ' &&
+				grid[i][0] === grid[i][1] &&
+				grid[i][1] === grid[i][2]) {
+					return grid[i][0];
+				}
+			}
+			
+			// Columns
+			for (var j = 0; j<3; j++) {
+				if (grid[0][j] != ' ' &&
+				grid[0][j] === grid[1][j] &&
+				grid[0][j] === grid[2][j]) {
+					return grid[0][j];
+				}
+			}
+			
+			// Diagonal - top left to bottom right
+			if (grid[0][0] != ' ' &&
+			grid[0][0] === grid[1][1] &&
+			grid[0][0] == grid[2][2]) {
+				return grid[0][0];
+			}			
+			
+			// Diagonal - bottom left to top right
+			if (grid[2][0] != ' ' &&
+			grid[2][0] === grid[1][1] &&
+			grid[2][0] == grid[0][2]) {
+				return grid[2][0];
+			}
+
+			for (var i = 0; i<3; i++) {
+				for (var j = 0; j<3; j++) {
+					if (grid[i][j] === ' ') {
+						return false;
+					}
+				}
+			}
+
+			return null;
+		}
+		
+		function minmax(newGrid, depth, player) {
+			const gameState = CheckGameState(newGrid);
+			
+			if (gameState === false) { // Empty space
+				const values = [];
+				
+				for (var i = 0; i<3; i++) {
+					for (var j = 0; j<3; j++) {
+						const gridCopy = _.cloneDeep(newGrid);
+						if (gridCopy[i][j] != ' ') continue;
+						gridCopy[i][j] = player;
+						const value = minmax(gridCopy, depth +1, (player === Nought) ? Cross : Nought);
+						values.push({
+							cost: value,
+							cell: {
+								i: i,
+								j: j
+							}
+						});
+					}
+				}
+				
+				if (player === Cross) {
+					const max = _.maxBy(values, (v) => {
+					return v.cost;
+				});
+					if (depth === 0) {
+						return max.cell;
+					} else {
+						return max.cost;
+					}
+				} else {
+					const min = _.minBy(values, (v) => {
+					return v.cost;
+				});
+					if (depth === 0) {
+						return min.cell;
+					} else {
+						return min.cost;
+					}
+				}
+					
+			}
+			else if (gameState === null) { // Draw
+				return 0; // Net zero score
+			}
+			else if (gameState === Nought) { // Player won (minimising player)
+				return depth - 10;
+			}
+			else if (gameState === Cross) { // Computer won (maximising player)
+				return 10 - depth; // Positive score
+			}
+			
+		}
+		
+		function moveAI() {
+			return minmax(grid, 0, Cross);
+		}
+		
+		function DisableAllButtons() {
+			document.querySelectorAll(".btn-primary").forEach(el => el.setAttribute("disabled", true));
+		}
+		
+		document.querySelectorAll(".btn-primary").forEach(el => el.addEventListener('click', function (event) {
+			event.target.setAttribute("disabled", true); // Disable button
+			const i = event.target.getAttribute("data-i");
+			const j = event.target.getAttribute("data-j");
+			
+			if (ToggleAI == false) {
+				if (TurnCount % 2 == 0) {
+					event.target.innerHTML = Nought; // Nought's turn
+					grid[i][j] = Nought;
+				}
+				else {
+					event.target.innerHTML = Cross; // Cross' turn
+					grid[i][j] = Cross;
+				}
+				
+				GameState = CheckGameState(grid);
+				if (GameState) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Game over: " + GameState + " wins");
+					},500);
+				}
+				if (GameState === null) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Draw");
+					},500);
+				}
+				TurnCount = TurnCount + 1;
+			}
+			else {
+				event.target.innerHTML = Nought;
+				grid[i][j]= Nought;
+			
+				var GameState = CheckGameState(grid);
+
+				if (GameState === null) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Draw");
+					},500);
+				}
+				
+				if (GameState) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Game over: " + GameState + " wins");
+					},500);
+					return;
+				} else {
+					const move = moveAI();
+					grid[move.i][move.j] = Cross;
+					document.querySelector(`[data-i='${move.i}'][data-j='${move.j}']`).innerHTML = Cross;
+					document.querySelector(`[data-i='${move.i}'][data-j='${move.j}']`).setAttribute("disabled", "true");
+				}
+				
+				GameState = CheckGameState(grid);
+				
+				if (GameState === null) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Draw");
+					},500);
+				}
+				
+				if (GameState) {
+					DisableAllButtons();
+					setTimeout(function(){
+						alert("Game over: " + GameState + " wins");
+					},500);
+				}
+				
+			}	
+
+		}));
+		
+		function restartGame() {
+			for (let i = 0; i < 3; i++) {
+				for (let j = 0; j < 3; j++) {
+					grid[i][j] = ' ';
+					document.querySelector(`[data-i='${i}'][data-j='${j}']`).innerHTML = " ";
+					document.querySelector(`[data-i='${i}'][data-j='${j}']`).removeAttribute("disabled");
+				}
+			}
+		}
+	
+	});
+	
+</script>
+
+</body>
+</html>
