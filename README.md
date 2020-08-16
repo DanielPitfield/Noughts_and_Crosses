@@ -1,7 +1,7 @@
 # Noughts_and_Crosses
-An online implementation of the 'Noughts and Crosses' game
+An online implementation of the 'Noughts and Crosses' game.
 
-A move can be made by clicking on any available position of the game board
+A move can be made by clicking on any available position of the game board.
 
 The game has two modes which can be toggled using the buttons below the game board:
 
@@ -9,9 +9,9 @@ The game has two modes which can be toggled using the buttons below the game boa
 
 * **Player vs Player:** The symbol (Nought or Cross) changes with every move made allowing for two human players to play against one another
 
-When the game has finished, the outcome of the game will be displayed 
+When the game has finished, the outcome of the game will be displayed. 
 
-The game can be restarted at any point by pressing the 'Restart' button
+The game can be restarted at any point by pressing the 'Restart' button.
 
 ### Known Issues
 * Use of Bootstrap (and jQuery) is unjustified
