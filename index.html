@@ -20,8 +20,16 @@
 		height: 28vh;
 		text-align: center;
 		background-color: white;
-		font-size: 80px;
+		font-size: 100px;
 		padding-top: 60px;
+	}
+
+	@media only screen and (max-width: 600px) {
+		.btn-primary {
+			padding: 0;
+			height: 20vh;
+			font-size: 80px;
+		}
 	}
 	
 	.btn-primary:disabled {
@@ -263,16 +271,10 @@
 				
 				GameState = CheckGameState(grid);
 				if (GameState) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Game over: " + GameState + " wins");
-					},500);
+					showResult(GameState);
 				}
 				if (GameState === null) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Draw");
-					},500);
+					showDraw();
 				}
 				TurnCount = TurnCount + 1;
 			}
@@ -283,17 +285,11 @@
 				var GameState = CheckGameState(grid);
 
 				if (GameState === null) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Draw");
-					},500);
+					showDraw();
 				}
 				
 				if (GameState) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Game over: " + GameState + " wins");
-					},500);
+					showResult(GameState);
 					return;
 				} else {
 					const move = moveAI();
@@ -305,22 +301,36 @@
 				GameState = CheckGameState(grid);
 				
 				if (GameState === null) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Draw");
-					},500);
+					showDraw();
 				}
 				
 				if (GameState) {
-					DisableAllButtons();
-					setTimeout(function(){
-						alert("Game over: " + GameState + " wins");
-					},500);
+					showResult(GameState);
 				}
 				
 			}	
 
 		}));
+
+		function showResult(GameState) {
+			DisableAllButtons();
+			setTimeout(function(){
+				alert("GAME OVER\n" + GameState + " wins!");
+				setTimeout(function(){
+					restartGame();
+				}, 2000);
+			},500);
+		}
+
+		function showDraw() {
+			DisableAllButtons();
+			setTimeout(function(){
+				alert("DRAW");
+				setTimeout(function(){
+					restartGame();
+				}, 2000);
+			},500);
+		}
 		
 		function restartGame() {
 			for (let i = 0; i < 3; i++) {
@@ -333,8 +343,6 @@
 		}
 	
 	});
-	
 </script>
-
 </body>
 </html>
